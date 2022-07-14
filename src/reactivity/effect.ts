@@ -6,7 +6,7 @@ class ReactiveEffect {
   }
   run() {
     activeEffect = this
-    this._fn()
+    return this._fn()
   }
 }
 /**
@@ -40,13 +40,12 @@ export function trigger(target, key) {
       effect.run();
     }
   }
-
 }
 
 
 
-
-export function effect(fn) {
+export function effect(fn):Function {
   let curEffect = new ReactiveEffect(fn);
   curEffect.run()
+  return curEffect.run.bind(curEffect)
 }
