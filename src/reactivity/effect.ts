@@ -1,10 +1,11 @@
 let activeEffect: ReactiveEffect
 class ReactiveEffect {
   private _fn: Function
-  constructor(fn) {
+  constructor(fn, public scheduler?) {
     this._fn = fn
   }
   run() {
+    let parent: any = activeEffect;
     activeEffect = this
     return this._fn()
   }
@@ -37,15 +38,21 @@ export function trigger(target, key) {
   let dep = despMap?.get(key)
   if (dep) {
     for (const effect of dep) {
-      effect.run();
+      if (effect.scheduler) {
+        effect.scheduler()
+      } else {
+        effect.run();
+      }
     }
   }
 }
 
 
 
-export function effect(fn):Function {
-  let curEffect = new ReactiveEffect(fn);
+export function effect(fn, option:any={}): Function {
+
+  let curEffect = new ReactiveEffect(fn, option.scheduler);
+
   curEffect.run()
   return curEffect.run.bind(curEffect)
 }
