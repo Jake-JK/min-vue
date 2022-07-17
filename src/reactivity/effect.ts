@@ -2,7 +2,7 @@ import { extend } from "../shared";
 
 export let activeEffect: ReactiveEffect
 let shouldTrack: boolean = false
-class ReactiveEffect {
+export class ReactiveEffect {
   private _fn: Function
   dep: Array<Set<ReactiveEffect>> = []
   active = true
@@ -12,6 +12,10 @@ class ReactiveEffect {
     this._fn = fn
     this.scheduler = scheduler;
   }
+  /**
+   * 执行_fn
+   * @returns 
+   */
   run() {
     if (!this.active) {
       return this._fn();
