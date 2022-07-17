@@ -1,4 +1,4 @@
-import { isReadonly, readonly } from "../reactive";
+import { isReactive, isReadonly, readonly } from "../reactive";
 
 describe("readonly", () => {
   it("should make nested values readonly", () => {
@@ -15,7 +15,6 @@ describe("readonly", () => {
     const user = readonly({
       age: 10,
     });
-
     user.age = 11;
     expect(console.warn).toHaveBeenCalled();
   });
