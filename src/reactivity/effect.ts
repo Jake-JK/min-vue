@@ -1,6 +1,6 @@
 import { extend } from "../shared";
 
-let activeEffect: ReactiveEffect
+export let activeEffect: ReactiveEffect
 let shouldTrack: boolean = false  
 class ReactiveEffect {
   private _fn: Function
@@ -16,9 +16,10 @@ class ReactiveEffect {
     if(!this.active) {
       return this._fn();
     }
-    activeEffect = this
     
+    activeEffect = this
     shouldTrack = true
+    //执行点_fn 会进行依赖收集
     let result = this._fn()
     shouldTrack = false 
     return result 
@@ -42,6 +43,7 @@ function clearupEffect(effect: ReactiveEffect){
   effect.dep.forEach((item: Set<ReactiveEffect>) => {
     item.delete(effect)
   }) 
+  effect.dep.length = 0
 }
 
 function isTracking(){
@@ -64,7 +66,7 @@ export function track(target: Object, key: string | symbol) {
     dep = new Set();
     depsMap.set(key, dep)
   }
- 
+  
   if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.dep.push(dep)
@@ -103,4 +105,8 @@ export function effect(fn, option: any = {}): Function {
   let runner: any = curEffect.run.bind(curEffect)
   runner.effect = curEffect
   return runner
+}
+
+export function getActiveEffect(){
+  return activeEffect
 }

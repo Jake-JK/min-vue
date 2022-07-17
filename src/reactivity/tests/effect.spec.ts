@@ -1,4 +1,4 @@
-import { effect,stop } from "../effect";
+import { activeEffect, effect,getActiveEffect,stop } from "../effect";
 import { reactive } from "../reactive";
 
 describe("effect", () => {
@@ -73,19 +73,33 @@ it("stop", () => {
     //此处会 obj.prop 会触发get方法，并执行track 进行依赖收集
     dummy = obj.prop;
   });
-  obj.prop = 2;
-  expect(dummy).toBe(2);
+  expect(dummy).toBe(1);
   // stop 清空依赖，并将reactiveEffect 实例中active 置为false
   stop(runner);
-  // obj.prop = 3;
-  obj.prop ++
-  // obj.prop = obj.prop +1
-  expect(dummy).toBe(2);
-
+  obj.prop = 3;
+  expect(dummy).toBe(1)
   // stopped effect should still be manually callable
   runner();
   expect(dummy).toBe(3);
 });
+
+it('test is repeat track', () => {
+  let dummy;
+  const obj = reactive({ prop: 1 });
+  obj.prop = 2;
+  const runner:any = effect(() => {
+    //此处会 obj.prop 会触发get方法，并执行track 进行依赖收集
+    dummy = obj.prop;
+  }); 
+  let runnerEffect:any = runner.effect
+  expect(dummy).toBe(2)
+  expect(getActiveEffect()).toBe(runnerEffect)
+  expect(runnerEffect.dep.length).toBe(1)
+  //此处 触发track 不会重复收集依赖
+  obj.prop = obj.prop + 1
+  expect(dummy).toBe(3)
+  expect(runnerEffect.dep.length).toBe(1)
+})
 
 it('test repeat track', () => {
   let allName = '';
@@ -100,14 +114,8 @@ it('test repeat track', () => {
   expect(allName).toBe('lujinke')
   fristName.name = 'liu'
   expect(allName).toBe('liujinke')
-  
   let elseName = lastName.name + '_Jake'
-
   expect(allName).toBe('liujinke')
-
-  
-  
-  
 })
 
 it("onStop", () => {
