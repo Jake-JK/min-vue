@@ -70,18 +70,45 @@ it("stop", () => {
   let dummy;
   const obj = reactive({ prop: 1 });
   const runner = effect(() => {
+    //此处会 obj.prop 会触发get方法，并执行track 进行依赖收集
     dummy = obj.prop;
   });
   obj.prop = 2;
   expect(dummy).toBe(2);
+  // stop 清空依赖，并将reactiveEffect 实例中active 置为false
   stop(runner);
-  obj.prop = 3;
+  // obj.prop = 3;
+  obj.prop ++
+  // obj.prop = obj.prop +1
   expect(dummy).toBe(2);
 
   // stopped effect should still be manually callable
   runner();
   expect(dummy).toBe(3);
 });
+
+it('test repeat track', () => {
+  let allName = '';
+  let fristName = reactive({name:'lu'})
+  let lastName = reactive({ name:'jinke' })
+  
+  const runner = effect(()=>{
+    //此处会执行 响应式对象 fristName与obj的get方法
+    allName = fristName.name + lastName.name
+  })
+
+  expect(allName).toBe('lujinke')
+  fristName.name = 'liu'
+  expect(allName).toBe('liujinke')
+  
+  let elseName = lastName.name + '_Jake'
+
+  expect(allName).toBe('liujinke')
+
+  
+  
+  
+})
 
 it("onStop", () => {
   const obj = reactive({

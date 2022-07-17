@@ -1,6 +1,7 @@
 import { extend } from "../shared";
 
 let activeEffect: ReactiveEffect
+let shouldTrack: boolean = false  
 class ReactiveEffect {
   private _fn: Function
   dep: Array<Set<ReactiveEffect>> = []
@@ -12,9 +13,15 @@ class ReactiveEffect {
     this.scheduler = scheduler;
   }
   run() {
-    let parent: any = activeEffect;
+    if(!this.active) {
+      return this._fn();
+    }
     activeEffect = this
-    return this._fn()
+    
+    shouldTrack = true
+    let result = this._fn()
+    shouldTrack = false 
+    return result 
   }
 
   stop() {
@@ -36,11 +43,17 @@ function clearupEffect(effect: ReactiveEffect){
     item.delete(effect)
   }) 
 }
+
+function isTracking(){
+  return activeEffect && shouldTrack
+}
+
 /**
  * 依赖收集
  */
 const targetMap: Map<Object, Map<Object, Set<ReactiveEffect>>> = new Map()
 export function track(target: Object, key: string | symbol) {
+  if(!isTracking()) return
   let depsMap = targetMap.get(target);
   if (!depsMap) {
     depsMap = new Map();
@@ -51,7 +64,8 @@ export function track(target: Object, key: string | symbol) {
     dep = new Set();
     depsMap.set(key, dep)
   }
-  if (!activeEffect) return
+ 
+  if (dep.has(activeEffect)) return
   dep.add(activeEffect)
   activeEffect.dep.push(dep)
 }
