@@ -1,7 +1,6 @@
 import { hasChanged, isObject } from "../shared"
 import { isTracking, trackEffect, triggerEffect } from "./effect"
 import { reactive } from "./reactive"
-
 class RefImpl {
   private _value: any
   public dep: Set<any>
