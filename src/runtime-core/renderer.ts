@@ -17,8 +17,35 @@ export function render(vnode, container) {
   patch(vnode, container)
 }
 function patch(vnode: any, container: any) {
+  if (typeof vnode.type == 'object') {
+    processComponent(vnode, container)
+  } else if (typeof vnode.type == 'string') {
+    processElement(vnode, container)
+  }
+}
 
-  processComponent(vnode, container)
+function processElement(vnode: any, container: any) {
+  const el = document.createElement(vnode.type)
+  const { children, props } = vnode;
+  
+  if (props) {
+    for (const key in props) {
+      el.setAttribute(key, props[key])
+    }
+  }
+  if (typeof children == 'string') {
+    el.textContent = children
+  } else if (Array.isArray(children)) {
+    mountChildren(children, el)
+  }
+  container.append(el)
+}
+
+function mountChildren(children: Array<any>, el: any) {
+  children.forEach(item => {
+    patch(item, el)
+  })
+
 }
 
 function processComponent(vnode: any, container: any) {
