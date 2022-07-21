@@ -25,12 +25,12 @@ function patch(vnode: any, container: any) {
 }
 
 function processElement(vnode: any, container: any) {
-  const el = document.createElement(vnode.type)
+  const el = (vnode.el = document.createElement(vnode.type))
   const { children, props } = vnode;
-  
   if (props) {
     for (const key in props) {
       el.setAttribute(key, props[key])
+   
     }
   }
   if (typeof children == 'string') {
@@ -50,15 +50,16 @@ function mountChildren(children: Array<any>, el: any) {
 
 function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container)
-}
-function mountComponent(vnode: any, container: any) {
+} 
+function mountComponent(vnode: any,container: any) {
   const instance = createComponentInstance(vnode)
-
   setupComponent(instance)
-  setupRenderEffect(instance, container)
+  setupRenderEffect(instance,vnode, container)
 }
-function setupRenderEffect(instance: any, container: any) {
-  const subTree = instance.render()
-
-  patch(subTree, container)
+function setupRenderEffect(instance: any,vnode, container: any) {
+  let { proxy } = instance;
+  const subTreeVnode = instance.render.call(proxy)
+  //处理完所有element 递归处理
+  patch(subTreeVnode, container)
+  instance.vnode.el = subTreeVnode.el
 }
