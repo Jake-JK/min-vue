@@ -1,5 +1,9 @@
 import { h } from '../../lib/mini-vue.esm.js'
 window.self = null
+
+window.to = function(num){
+  return Number(num).toString('2')
+};
 export const App = {
   render() {
 
