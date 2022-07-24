@@ -1,4 +1,4 @@
-import { isObject, extend } from "../shared";
+import { isObject, extend } from "../shared/index";
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlags, readonly } from "./reactive";
 
@@ -44,7 +44,7 @@ export const mutableHandler = {
 export const readonlyHandler = {
   get: readonlyGet,
   set(target, key, value) {
-    console.warn(`${target} 为 readonly 对象,不可被改变`)
+    console.warn(`${String(key)} set失败， 因为 target 为 readonly 对象,不可被改变`)
     return true
   }
 }

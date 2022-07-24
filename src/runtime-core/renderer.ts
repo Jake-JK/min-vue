@@ -30,17 +30,18 @@ function processElement(vnode: any, container: any) {
   const el = (vnode.el = document.createElement(vnode.type))
   const { children, props, shapeFlag } = vnode;
   if (props) {
-    let isOn = (e:string) => {
+    let isOn = (e: string) => {
       return /^on[A-Z]/.test(e)
     }
-    let getEvent = (e:string) => {
+    let getEvent = (e: string) => {
       return e.slice(2).toLowerCase()
     }
     for (const key in props) {
-      if(isOn(key)) {
+      if (isOn(key)) {
         el.addEventListener(getEvent(key), props[key])
+      } else {
+        el.setAttribute(key, props[key])
       }
-      el.setAttribute(key, props[key])
     }
   }
   if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
