@@ -1,5 +1,6 @@
 import { ShapeFlags } from "../shared/ShapeFlags"
 import { createComponentInstance, setupComponent } from "./component"
+import { vnode } from "./vnode"
 
 /**
  * render 流程
@@ -14,10 +15,10 @@ import { createComponentInstance, setupComponent } from "./component"
         setupComponent setUp 
  *  
  */
-export function render(vnode, container) {
+export function render(vnode:vnode, container) {
   patch(vnode, container)
 }
-function patch(vnode: any, container: any) {
+function patch(vnode: vnode, container: any) {
   const { shapeFlag } = vnode
   if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     processComponent(vnode, container)
@@ -59,18 +60,18 @@ function mountChildren(children: Array<any>, el: any) {
 
 }
 
-function processComponent(vnode: any, container: any) {
+function processComponent(vnode: vnode, container: any) {
   mountComponent(vnode, container)
 }
-function mountComponent(vnode: any, container: any) {
-  const instance = createComponentInstance(vnode)
+function mountComponent(initialVNode: vnode, container: any) {
+  const instance = createComponentInstance(initialVNode)
   setupComponent(instance)
-  setupRenderEffect(instance, vnode, container)
+  setupRenderEffect(instance, initialVNode, container)
 }
-function setupRenderEffect(instance: any, vnode, container: any) {
+function setupRenderEffect(instance: any, initialVNode: vnode, container: any) {
   let { proxy } = instance;
   const subTreeVnode = instance.render.call(proxy)
   //处理完所有element 递归处理
   patch(subTreeVnode, container)
-  instance.vnode.el = subTreeVnode.el
+  initialVNode.el = subTreeVnode.el
 }
