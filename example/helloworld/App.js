@@ -11,10 +11,19 @@ export const App = {
     // ui
     return h("div", {
       id:"root",
-      class: ["red", "green"]
+      class: ["red", "green"],
+      onClick :() => {
+        console.log('click')
+      },
+      onMousedown:() => {
+        console.log('mouseDown')
+        
+      }
+      
+
     },
-    // "hi, " + this.msg
-    [h("p", { class:"red"}, "hi," + this.msg), h("p", {class:"green"}, "mini-vue")]
+    "hi, " + this.msg
+    // [h("p", { class:"red",onClick:()=>console.log('click')}, "hi," + this.msg), h("p", {class:"green"}, "mini-vue")]
     )
   },
 
