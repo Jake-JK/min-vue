@@ -23,6 +23,7 @@ export const Foo = {
       }),
       foo,
       renderSlots(this.$slots, "footer"),
+      renderSlots(this.$slots, "text"),
     ]);
   },
 };

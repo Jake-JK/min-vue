@@ -1,6 +1,6 @@
 import { ShapeFlags } from "../shared/ShapeFlags"
 import { createComponentInstance, setupComponent } from "./component"
-import { vnode } from "./vnode"
+import { Fragment, vnode, Text } from "./vnode"
 
 /**
  * render 流程
@@ -15,16 +15,36 @@ import { vnode } from "./vnode"
         setupComponent setUp 
  *  
  */
-export function render(vnode:vnode, container) {
+export function render(vnode: vnode, container) {
   patch(vnode, container)
 }
 function patch(vnode: vnode, container: any) {
-  const { shapeFlag } = vnode
-  if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    processComponent(vnode, container)
-  } else if (shapeFlag & ShapeFlags.ELEMENT) {
-    processElement(vnode, container)
+  const { shapeFlag, type } = vnode
+  switch (type) {
+    case Fragment:
+      processFragment(vnode, container);
+      break;
+    case Text:
+      processText(vnode, container);
+      break
+    default:
+      if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        processComponent(vnode, container)
+      } else if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(vnode, container)
+      }
+      break;
   }
+}
+
+function processText(vnode: any, container: any) {
+  let el = (vnode.el = document.createTextNode(vnode.children));
+  
+  container.append(el)
+}
+
+function processFragment(vnode: any, container: any) {
+  mountChildren(vnode.children, container)
 }
 
 function processElement(vnode: any, container: any) {
@@ -57,7 +77,6 @@ function mountChildren(children: Array<any>, el: any) {
   children.forEach(item => {
     patch(item, el)
   })
-
 }
 
 function processComponent(vnode: vnode, container: any) {
