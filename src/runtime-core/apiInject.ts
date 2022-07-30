@@ -15,5 +15,9 @@ export function provide(key, value) {
 
 export function inject(key, defaultValue) {
   let instance: any = getCurrentInstance()
-  return instance.parent.provides[key]
+  let res = instance.parent.provides[key];
+  if(typeof defaultValue == 'function'){
+    defaultValue = defaultValue()
+  }
+  return res? res : defaultValue
 }
