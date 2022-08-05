@@ -20,10 +20,18 @@ import { Fragment, vnode, Text } from "./vnode";
  */
 
 export function createRenderer(options) {
-  const { createElement, patchProp: hostPathProp, insert } = options;
+  const {
+    createElement: hostCreateElement,
+    patchProp: hostPathProp,
+    insert: hostInsert,
+    remove: hostRemove,
+    setElementText: hostSetElementText,
+  } = options;
+
   function render(vnode: vnode, container, parentComponent) {
     patch(null, vnode, container, parentComponent);
   }
+
   function patch(n1: vnode | null, n2: vnode, container: any, parentComponent) {
     const { shapeFlag, type } = n2;
     switch (type) {
@@ -57,11 +65,12 @@ export function createRenderer(options) {
     if (!n1) {
       mountElement(n2, container, parentComponent);
     } else {
-      patchElement(n1, n2, container);
+      patchElement(n1, n2, parentComponent);
     }
   }
+
   function mountElement(vnode: any, container: any, parentComponent: any) {
-    const el = (vnode.el = createElement(vnode));
+    const el = (vnode.el = hostCreateElement(vnode));
     const { children, props, shapeFlag } = vnode;
     if (props) {
       for (const key in props) {
@@ -73,10 +82,10 @@ export function createRenderer(options) {
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
       mountChildren(children, el, parentComponent);
     }
-    insert(container, el);
+    hostInsert(container, el);
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, parentCompoent) {
     console.log("patchElement");
     console.log("n1", n1);
     console.log("n2", n2);
@@ -87,8 +96,35 @@ export function createRenderer(options) {
     let el = (n2.el = n1.el);
     console.log("prevProps:", prevProps);
     console.log("nextProps:", nextProps);
-
+    patchChildren(el, n1, n2, parentCompoent);
     patchProps(el, prevProps, nextProps);
+  }
+
+  function patchChildren(el, n1, n2, parentCompoent) {
+    let prevShapFlag = n1.shapeFlag;
+    let nextShapFlag = n2.shapeFlag;
+    let prevChildren = n1.children;
+    let nextChildren = n2.children;
+
+    if (nextShapFlag & ShapeFlags.TEXT_CHILDREN) {
+      if (prevShapFlag & ShapeFlags.ARRAY_CHILDREN) {
+        unmountChildren(prevChildren);
+      }
+
+      if (prevChildren !== nextChildren) {
+        hostSetElementText(el, nextChildren);
+      }
+    } else {
+      hostSetElementText(el, "");
+      mountChildren(nextChildren, el, parentCompoent);
+    }
+  }
+
+  function unmountChildren(children) {
+    for (let i = 0; i < children.length; i++) {
+      let item = children[i].el;
+      hostRemove(item);
+    }
   }
 
   function patchProps(el, prevProps, nextProps) {
