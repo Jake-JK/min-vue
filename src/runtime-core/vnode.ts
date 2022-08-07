@@ -9,12 +9,14 @@ export type vnode = {
   props: Object,
   children: Array<vnode>,
   shapeFlag: number,
+  key?,
   el: Element | null
 }
 export function createVNode(type, props?, children?) :vnode {
   const vnode :vnode = {
     type,
     props,
+    key: props && props.key,
     children,
     shapeFlag: getShapeFlag(type),
     el: null

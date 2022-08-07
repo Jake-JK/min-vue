@@ -189,7 +189,7 @@ export function createRenderer(options) {
 
     //新的比老的长  - 新增
     if (i > e1) {
-     if (i <= e2) {
+      if (i <= e2) {
         const nextPos = e2 + 1;
         const anchor = nextPos < n2.length ? n2[nextPos].el : null;
         while (i <= e2) {
@@ -197,11 +197,43 @@ export function createRenderer(options) {
           i++;
         }
       }
-    }else if(i > e2){
-      while(i <= e1){
-        hostRemove(n1[i].el)
-        i++
+    } else if (i > e2) {
+      while (i <= e1) {
+        hostRemove(n1[i].el);
+        i++;
       }
+    } else {
+      //中间部分
+      let s1 = i;
+      let s2 = i;
+
+      let newIndexMap = new Map();
+
+      for (let i = s2; i <= e2; i++) {
+        newIndexMap.set(n1[i].props.key, i);
+      }
+
+      let newIndex;
+      let oldMidLen = e1 - s1 + 1;
+      let patchTimes = 0;
+      for (let i = s1; i <= e1; i++) {
+        let prevNode = n1[i];
+        if(patchTimes >= oldMidLen){
+          hostRemove(prevNode.el)
+          continue
+        }
+        
+        let key = prevNode.props.key;
+        if (newIndexMap.has(key)) {
+          newIndex = newIndexMap.get(key);
+          patch(prevNode, n2[newIndex], container, parentComponent, null);
+        }else{
+          hostRemove(prevNode.el)
+          patchTimes++
+        }
+      }
+
+      console.log(newIndexMap);
     }
   }
 
